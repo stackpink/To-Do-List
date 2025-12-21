@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="./list.css"/>
+</head>
+<body>
+    <div id="c1">
+        <div class="img">
+            <img src="./images/_.gif"/>
+        </div>
+        <div class="img">
+            <img src="./images/0.jpeg" height="377px" width="480px"/>
+        </div>
+    </div>
+
+    <div id="c2">
+        <div id="user">
+            <div id="signIn">
+                <label for="username">Username : </label>
+                <input type="text" placeholder="Zara Verma" id="username"/>
+                <label>Password : </label>
+                <input type="password" placeholder="Z@r@123." id="password"/>
+                <button onclick="signIn()">SignIn</button>
+            </div>
+            <div id="signUp">
+                New User or Don't have an account? 
+                <a onclick="signUp()">SignUp</a>
+            </div>
+            <div id="signedIn">
+            </div>
+        </div>
+    </div>
+
+    <div id="c3">
+        <div class="img">
+            <img src="./images/3.jpeg" height="377px" width="480px"/>
+        </div>
+        <div class="img" id="img1">
+            <img src="./images/5.jpeg" height="377px" width="350px"/>
+        </div>
+    </div>
+</body>
+<script>
+    let activeUserCount=0;
+
+    async function signIn(){
+        let response=await fetch("http://localhost:3000/todo/signin",{
+            method:"POST",
+            body:JSON.stringify({
+                "username":document.getElementById('username').value,
+                "password":document.getElementById('password').value
+            }),
+            headers:{"Content-Type":"application/json"}
+        })
+        let token= response.headers.get('Authorization');
+        let userNumber=activeUserCount;
+        activeUserCount++;
+        localStorage.setItem(userNumber,JSON.stringify({
+                ['Authorization']:token,
+                ['userNumber']:userNumber,
+                ['list']:[]})) // multiple user logic?? -- maintain a arr of num of active users, or do stuff with id?
+        let data=await response.json()
+        document.getElementById('signedIn').innerHTML=`<div> You just singed in ! </div>
+                                                        <button onclick="todoList(${userNumber})"> GO TO YOUR TO-DO LIST </button>`;
+        document.getElementById('username').value="";
+        document.getElementById('password').value="";
+        // console.log(data);
+    }
+
+    async function todoList(userNumber){
+        let userDetails=localStorage.getItem(userNumber)
+        // let {Authorization,list,userId}=JSON.parse(userDetails) incorrect why?
+        let parsed=JSON.parse(userDetails)
+        let token=parsed.Authorization
+        //console.log(token)
+        let response=await fetch("http://localhost:3000/todo/get",{
+            method:'GET',
+            headers:{'Authorization':token}
+        })
+        let data=await response.json()
+        // console.log(data);
+        list=data.data;
+        localStorage.setItem(userNumber,JSON.stringify({
+            ['Authorization']:token,
+            ['list']:list,
+            ['userNumber']:userNumber
+        }))
+        display(userNumber)
+    }
+
+    function createTodo(task,taskNumber,userNumber){
+        let div=document.createElement('div');
+        div.setAttribute('class','todo');
+        div.setAttribute('id',taskNumber);
+        let todo=document.createElement('div');
+        let del=document.createElement('button');
+        let edit=document.createElement('button');
+        del.innerHTML="&#9989; slayed";
+        del.setAttribute('onclick',`deleteTodo(${userNumber},${taskNumber})`);
+        edit.innerHTML="&#129760; Edit (regret)";
+        edit.setAttribute('onclick',`editInput(${userNumber},${taskNumber})`);
+        todo.innerHTML=`${taskNumber}. ${task}`;
+        div.appendChild(todo);
+        div.appendChild(del);
+        div.appendChild(edit);
+        return div;
+    }
+
+    function display(userNumber){
+        let list=document.getElementById('user');
+        list.innerHTML="";
+        let userDetails=localStorage.getItem(userNumber);
+        let parsed=JSON.parse(userDetails)
+        let line3=document.createElement('div');
+        line3.setAttribute('class','line');
+        list.appendChild(line3);
+        let top=document.createElement('div');
+        top.setAttribute('class','boundary');
+        top.innerHTML=`&#128062; &#9789; &#9825; &#8967; &#9734; &#10049; &#10048; &#10023; &#9734; &#8314; &#9825; &#9676; TO-DO LIST &#9676; &#9825; &#8314; &#9734; &#10023; &#10048; &#10049; &#9734; &#8967; &#9825; &#9789; &#128062;`;
+        list.appendChild(top);
+        let line1=document.createElement('div');
+        line1.setAttribute('class','line');
+        list.appendChild(line1);
+        for(let i=0;i<parsed.list.length;i++){
+            let todo=createTodo(parsed.list[i],i+1,userNumber);
+            list.appendChild(todo);
+        }
+        features(list,userNumber)
+        let bottom=document.createElement('div');
+        bottom.setAttribute('class','boundary');
+        bottom.innerHTML='&#128062; &#10023; &#9825; &#8967; &#9734; &#9676; &#10048; &#9734; &#xA565; &#9825; &#10049; &#8314; &#8314; &#8314; &#10049; &#9825; &#xA565; &#9734; &#10048; &#9676; &#9734; &#8967; &#9825; &#10023; &#128062;';
+        let line2=document.createElement('div');
+        line2.setAttribute('class','line');
+        list.appendChild(line2);
+        list.appendChild(bottom);
+        let line4=document.createElement('div');
+        line4.setAttribute('class','line');
+        list.appendChild(line4);
+    }
+
+    function features(list,userNumber) {
+        //add
+        let div=document.createElement('div');
+        div.setAttribute('id','anotherLieDiv');
+        let button1=document.createElement('button');
+        button1.innerHTML="+ procrastinate later";
+        button1.setAttribute("onclick",`add(${userNumber})`);
+        let inputBox=document.createElement('input');
+        inputBox.setAttribute('placeholder','Add another lie');
+        inputBox.setAttribute('id','anotherLie');
+        div.appendChild(inputBox);
+        div.appendChild(button1);
+        list.appendChild(div);
+    }
+    
+    async function add(userNumber){
+        let userDetails=localStorage.getItem(userNumber);
+        let parsed=JSON.parse(userDetails);
+        let response=await fetch('http://localhost:3000/todo/create',{
+            method:'POST',
+            headers:{'Authorization':parsed.Authorization,
+                "Content-Type":"application/json" //--- why do i always forget
+            },
+            body:JSON.stringify({
+                "task":document.getElementById('anotherLie').value
+            })
+        })
+        //console.log(document.getElementById('anotherLie').value);
+        document.getElementById('anotherLie').value="";
+        todoList(userNumber);
+    }
+
+    async function deleteTodo(userNumber,taskNumber){
+        let userDetails=localStorage.getItem(userNumber);
+        let parsed=JSON.parse(userDetails);
+        let response=await fetch('http://localhost:3000/todo/delete',{
+            method:'DELETE',
+            body:JSON.stringify({
+                task:parsed.list[taskNumber-1]
+            }),
+            headers:{'Authorization':parsed.Authorization,
+                'Content-Type':'application/json'
+            }
+        })
+        todoList(userNumber);
+    }
+
+        async function editInput(userNumber,taskNumber){
+        let div=document.getElementById(taskNumber);
+        div.innerHTML="";
+        let userDetails=localStorage.getItem(userNumber);
+        let parsed=JSON.parse(userDetails);
+        let inputBox=document.createElement('input');
+        inputBox.setAttribute('id','update');
+        inputBox.setAttribute('placeholder',parsed.list[taskNumber-1])
+        let update=document.createElement('button');
+        update.innerHTML="&#129760; Edit (regret)";
+        update.setAttribute('onclick',`edit(${userNumber},${taskNumber})`);
+        div.appendChild(inputBox);
+        div.appendChild(update);
+    }
+    
+    async function edit(userNumber,taskNumber){
+        let userDetails=localStorage.getItem(userNumber);
+        let parsed=JSON.parse(userDetails);
+        let newTodo=document.getElementById('update').value;
+        let response=await fetch('http://localhost:3000/todo/update',{
+            method:'PUT',
+            headers:{
+                "Authorization":parsed.Authorization,
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                task:parsed.list[taskNumber-1],
+                newTask:newTodo
+            })
+        })
+        todoList(userNumber);
+    }
+
+</script>
+</html>
