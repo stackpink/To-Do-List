@@ -18,6 +18,7 @@
 
     <div id="c2">
         <div id="user">
+            <div class="decor">&#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; </div>
             <div id="signIn">
                 <label for="username">Username : </label>
                 <input type="text" placeholder="Zara Verma" id="username"/>
@@ -29,6 +30,7 @@
                 New User or Don't have an account? 
                 <a onclick="signUp()">SignUp</a>
             </div>
+            <div class="decor">&#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; </div>
             <div id="signedIn">
             </div>
         </div>
@@ -46,6 +48,58 @@
 <script>
     let activeUserCount=0;
 
+    // function logOut(){
+    //     console.log('aaaa')
+    //     //window.location.reload(true);
+    // }
+
+    function displayError(message){
+        document.getElementById('user').innerHTML=`
+        <div >
+            <div class ='errorMessage'> Trying to mess with a beginners code huuuuuhhhhhhhh 
+            </div>
+            <div class ='errorMessage'> &#128545; &#128548; &#128520; NOT COOL ! </div>
+            <div> ${JSON.stringify(message)}
+            </div>
+        </div>`
+    }
+
+    async function signUp(){
+        document.getElementById('user').innerHTML=`
+        <div class="decor">&#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; </div>
+            <div id="signIn">
+                <label for="username">Username : </label>
+                <input type="text" placeholder="Zara Verma" id="username"/>
+                <label>Password : </label>
+                <input type="password" placeholder="Z@r@123." id="password"/>
+                <label>Email : </label>
+                <input type="email" placeholder="zara@pawmail.com" id="email"/>
+            </div>
+            <button onclick="signInAfterSignUp()">SignIn</button>
+            <div class="decor">&#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; &nbsp;&nbsp;&nbsp;&nbsp; &#127872; </div>
+        `
+    }
+
+    async function signInAfterSignUp(){
+        let response=await fetch('http://localhost:3000/todo/signup',{
+            method:"POST",
+            body:JSON.stringify({
+                // username:document.getElementById('username').value,
+                password:document.getElementById('password').value,
+                email:document.getElementById('email').value,
+            }),
+            headers:{"Content-Type":"application/json"}
+        })
+        if(!response.ok){
+            let error =await response.json();
+            displayError(error);
+        }
+        else{
+            let data=await response.json();
+            window.location.reload(true);
+        }
+    }
+
     async function signIn(){
         let response=await fetch("http://localhost:3000/todo/signin",{
             method:"POST",
@@ -62,9 +116,13 @@
                 ['Authorization']:token,
                 ['userNumber']:userNumber,
                 ['list']:[]})) // multiple user logic?? -- maintain a arr of num of active users, or do stuff with id?
+        if(!response.ok){
+            let error=await response.json();
+            displayError(error)
+        }
         let data=await response.json()
-        document.getElementById('signedIn').innerHTML=`<div> You just singed in ! </div>
-                                                        <button onclick="todoList(${userNumber})"> GO TO YOUR TO-DO LIST </button>`;
+        document.getElementById('signedIn').innerHTML=`<div id="signInBox"> <div> You just singed in ! </div>
+                                                        <button onclick="todoList(${userNumber})"> GO TO YOUR TO-DO LIST </button> </div>`;
         document.getElementById('username').value="";
         document.getElementById('password').value="";
         // console.log(data);
@@ -80,6 +138,10 @@
             method:'GET',
             headers:{'Authorization':token}
         })
+        if(!response.ok){
+            let error=await response.json();
+            displayError(error);
+        }
         let data=await response.json()
         // console.log(data);
         list=data.data;
@@ -131,6 +193,7 @@
         features(list,userNumber)
         let bottom=document.createElement('div');
         bottom.setAttribute('class','boundary');
+        //bottom.innerHTML='&#128062; &#10023; &#8967; &#9734; &#9673; &#10048; &#127872; &#9734; &#42743; &#9825; &#10049; &#8314; &#10024; &#8314; &#10049; &#9825; &#42743; &#9734; &#10048; &#9673; &#9734; &#8967; &#10023; &#128062;'
         bottom.innerHTML='&#128062; &#10023; &#9825; &#8967; &#9734; &#9676; &#10048; &#9734; &#xA565; &#9825; &#10049; &#8314; &#8314; &#8314; &#10049; &#9825; &#xA565; &#9734; &#10048; &#9676; &#9734; &#8967; &#9825; &#10023; &#128062;';
         let line2=document.createElement('div');
         line2.setAttribute('class','line');
@@ -148,11 +211,15 @@
         let button1=document.createElement('button');
         button1.innerHTML="+ procrastinate later";
         button1.setAttribute("onclick",`add(${userNumber})`);
+        //let logOut=document.createElement('button');
+        //logOut.setAttribute("onclick()","logOut()")
+        //logOut.innerHTML='RAGE QUIT &#128162; &#128298; ';
         let inputBox=document.createElement('input');
         inputBox.setAttribute('placeholder','Add another lie');
         inputBox.setAttribute('id','anotherLie');
         div.appendChild(inputBox);
         div.appendChild(button1);
+        //div.appendChild(logOut);
         list.appendChild(div);
     }
     
@@ -168,6 +235,10 @@
                 "task":document.getElementById('anotherLie').value
             })
         })
+        if(!response.ok){
+            let error=await response.json();
+            displayError(error);
+        }
         //console.log(document.getElementById('anotherLie').value);
         document.getElementById('anotherLie').value="";
         todoList(userNumber);
@@ -185,10 +256,14 @@
                 'Content-Type':'application/json'
             }
         })
+        if(!response.ok){
+            let error=await response.json();
+            displayError(error);
+        }
         todoList(userNumber);
     }
 
-        async function editInput(userNumber,taskNumber){
+    async function editInput(userNumber,taskNumber){
         let div=document.getElementById(taskNumber);
         div.innerHTML="";
         let userDetails=localStorage.getItem(userNumber);
@@ -218,6 +293,10 @@
                 newTask:newTodo
             })
         })
+        if(!response.ok){
+            let error=await response.json();
+            displayError(error);
+        }
         todoList(userNumber);
     }
 
