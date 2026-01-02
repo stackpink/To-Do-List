@@ -10,11 +10,11 @@ A simple, fullstack todo application built from scratch with vanilla technologie
 <img width="1507" height="785" alt="Screenshot 2026-01-02 at 1 54 39 PM" src="https://github.com/user-attachments/assets/9789c680-6f32-41ef-8491-f9b7a573d6ae" />
 
 ## Tech Stack
-1.Frontend: HTML + CSS (custom grid layout) + JavaScript (manual DOM manipulation, fetch API)
-2.Backend: Node.js + Express
-3.Database: MongoDB + Mongoose
-4.Authentication: JWT + bcrypt
-5.Validation: Zod schemas
+1. Frontend: HTML + CSS (custom grid layout) + JavaScript (manual DOM manipulation, fetch API)
+2. Backend: Node.js + Express
+3. Database: MongoDB + Mongoose
+4. Authentication: JWT + bcrypt
+5. Validation: Zod schemas
 
 ## Features
 1. SignUp / SignIn
